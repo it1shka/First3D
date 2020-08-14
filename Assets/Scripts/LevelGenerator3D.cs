@@ -21,16 +21,15 @@ public class LevelGenerator3D : MonoBehaviour
     public Color[] terrainColors;
     public float[] terrainColorThresholds;
     public static Vector2 globalOffset;
-    void Awake()
-    {
-        meshFilter = GetComponent<MeshFilter>();
-        meshCollider = GetComponent<MeshCollider>();
-        meshRenderer = GetComponent<MeshRenderer>();
-        GenerateLevel();
-    }
 
     public void GenerateLevel()
     {
+        #region Getting refs to components
+        meshFilter = GetComponent<MeshFilter>();
+        meshCollider = GetComponent<MeshCollider>();
+        meshRenderer = GetComponent<MeshRenderer>();
+        #endregion
+
         #region Generating offset, heightMap, texture and mesh
 
         var verts = meshFilter.mesh.vertices;
@@ -72,7 +71,8 @@ public class LevelGenerator3D : MonoBehaviour
         meshFilter.mesh.vertices = verts;
         meshFilter.mesh.RecalculateNormals();
         meshFilter.mesh.RecalculateBounds();
-        meshCollider.sharedMesh = meshFilter.mesh;
+        if(meshCollider)
+            meshCollider.sharedMesh = meshFilter.mesh;
         #endregion
 
     }
@@ -129,7 +129,6 @@ public static class NoiseMap {
 
         return noiseMap;
     }
-
     #endregion
 
     #region Get Texture Methods
@@ -199,3 +198,4 @@ public class Wave {
         amplitude,
         seed;
 }
+

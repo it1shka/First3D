@@ -55,6 +55,7 @@ public class MapGenerator3D : MonoBehaviour
                 var levelPosition =
                     new Vector3(levelSize.x * x, 0f, levelSize.y * z) + transform.position;
                 var newLevel = Instantiate(levelPrefab, levelPosition, Quaternion.identity);
+                newLevel.GetComponent<LevelGenerator3D>().GenerateLevel();
                 var meshFilter = newLevel.GetComponent<MeshFilter>();
                 var vertexes = meshFilter.mesh.vertices;
                 for(var lz =0; lz < levelVertSize; lz++)
