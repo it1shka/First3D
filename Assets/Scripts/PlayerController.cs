@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
-    #region Public Vars
+#region Public Vars
     public float mouseSensitivity = 100f;
     public Transform cameraTf;
 
@@ -21,9 +21,9 @@ public class PlayerController : MonoBehaviour
 
     [Space, Space]
     public Transform stars;
-    #endregion
+#endregion
 
-    #region Private Vars
+#region Private Vars
     private float xRotation = 0f;
     private Vector3 velocity;
     private CharacterController controller;

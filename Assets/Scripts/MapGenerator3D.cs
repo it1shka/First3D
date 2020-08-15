@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
-
+using UnityEngine.UI;
+using TMPro;
 public class MapGenerator3D : MonoBehaviour
 {
+    [Space, Space]
+    public float downgrading = 1f;
+
     [Space, Space]
     public GameObject levelPrefab;
     public Vector2 levelSize = new Vector2(10, 10);
@@ -18,12 +21,20 @@ public class MapGenerator3D : MonoBehaviour
     public int tiling = 4;
     public SpawnObject[] spawnableObjects;
 
+    [Space, Space]
+    public GameObject loadingScreen;
+    public TextMeshProUGUI
+        status,
+        percents;
+    public Slider slider;
     //[Space, Space]
     //public Transform starsTf;
 
     private int levelVertSize;
     private void Start()
     {
+        levelSize *= downgrading;
+
         levelVertSize = (int)Mathf.Sqrt(
             levelPrefab.GetComponent<MeshFilter>().
                 sharedMesh.vertices.Length
@@ -48,14 +59,21 @@ public class MapGenerator3D : MonoBehaviour
     {
         var operations = 0;
         var globalVertexPositions = new Vector3[levelVertSize * mapDepth, levelVertSize * mapWidth];
-        for (var z = 0; z < mapDepth; z++)
+        for (int z = 0, operationsTotal = 0; z < mapDepth; z++)
         {
-            for (var x = 0; x < mapWidth; x++)
+            for (var x = 0; x < mapWidth; x++, operationsTotal++)
             {
                 var levelPosition =
                     new Vector3(levelSize.x * x, 0f, levelSize.y * z) + transform.position;
                 var newLevel = Instantiate(levelPrefab, levelPosition, Quaternion.identity);
-                newLevel.GetComponent<LevelGenerator3D>().GenerateLevel();
+                var genComp = newLevel.GetComponent<LevelGenerator3D>();
+                genComp.mapScale /= downgrading;
+                genComp.transform.localScale = new Vector3(
+                    genComp.transform.localScale.x * downgrading,
+                    genComp.transform.localScale.y,
+                    genComp.transform.localScale.z * downgrading
+                );
+                genComp.GenerateLevel();
                 var meshFilter = newLevel.GetComponent<MeshFilter>();
                 var vertexes = meshFilter.mesh.vertices;
                 for(var lz =0; lz < levelVertSize; lz++)
@@ -67,7 +85,9 @@ public class MapGenerator3D : MonoBehaviour
                             = meshFilter.transform.TransformPoint(vertexes[localVertexIndex]);
                     }
                 }
-                
+
+                SetStatus("Generating tiles...",  (float)operationsTotal / mapDepth / mapWidth );
+
                 operations++;
                 if(operations >= asyncOperations)
                 {
@@ -78,17 +98,19 @@ public class MapGenerator3D : MonoBehaviour
         }
 
         Debug.LogWarning("Map gened async!");
-        if(spawnObjects)
-        StartCoroutine(SpawnTreesAsync(globalVertexPositions));
+        if (spawnObjects)
+            StartCoroutine(SpawnTreesAsync(globalVertexPositions));
+        else
+            loadingScreen.SetActive(false);
         yield break; 
     }
 
     private IEnumerator SpawnTreesAsync(Vector3[,] globalVertexPositions)
     {
         var operations = 0;
-        for(var zInd=0; zInd < globalVertexPositions.GetLength(0) / tiling; zInd++)
+        for(int zInd=0, operationsTotal = 0; zInd < globalVertexPositions.GetLength(0) / tiling; zInd++)
         {
-            for(var xInd = 0; xInd < globalVertexPositions.GetLength(1) / tiling; xInd++)
+            for(var xInd = 0; xInd < globalVertexPositions.GetLength(1) / tiling; xInd++, operationsTotal++)
             {
                 var heightSum = 0f;
                 for(var zStart = zInd * tiling; zStart < (zInd + 1) * tiling; zStart++)
@@ -122,7 +144,10 @@ public class MapGenerator3D : MonoBehaviour
                         break;
                     }
                 }
-                if(operations >= asyncOperations)
+
+                SetStatus("Planting trees...", (float)operationsTotal / globalVertexPositions.GetLength(0) * tiling / globalVertexPositions.GetLength(1) * tiling);
+
+                if (operations >= asyncOperations)
                 {
                     operations = 0;
                     yield return null;
@@ -133,8 +158,17 @@ public class MapGenerator3D : MonoBehaviour
         // //placing the stars
         //starsTf.position = transform.position + new Vector3(levelSize.x * mapWidth / 2, 0f, levelSize.y * mapDepth / 2);
 
+        loadingScreen.SetActive(false);
+
         Debug.LogWarning("Trees gened async!");
         yield break;
+    }
+
+    private void SetStatus(string message, float value)
+    {
+        status.text = message;
+        slider.value = value;
+        percents.text = $"{(int)(value * 100)}%";
     }
 }
 
