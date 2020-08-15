@@ -18,8 +18,8 @@ public class MapGenerator3D : MonoBehaviour
     public int tiling = 4;
     public SpawnObject[] spawnableObjects;
 
-    [Space, Space]
-    public Transform starsTf;
+    //[Space, Space]
+    //public Transform starsTf;
 
     private int levelVertSize;
     private void Start()
@@ -130,8 +130,8 @@ public class MapGenerator3D : MonoBehaviour
             }
         }
 
-        //placing the stars
-        starsTf.position = transform.position + new Vector3(levelSize.x * mapWidth / 2, 0f, levelSize.y * mapDepth / 2);
+        // //placing the stars
+        //starsTf.position = transform.position + new Vector3(levelSize.x * mapWidth / 2, 0f, levelSize.y * mapDepth / 2);
 
         Debug.LogWarning("Trees gened async!");
         yield break;
