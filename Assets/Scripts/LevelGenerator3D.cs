@@ -198,4 +198,3 @@ public class Wave {
         amplitude,
         seed;
 }
-

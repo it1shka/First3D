@@ -14,7 +14,9 @@ public class MapGenerator3D : MonoBehaviour
     public int
         mapDepth = 5,
         mapWidth = 5;
-    public int asyncOperations = 100;
+    public int
+        asyncOperationsTile = 100,
+        asyncOperationsTree = 1000;
 
     [Space, Space]
     public bool spawnObjects = false;
@@ -34,6 +36,10 @@ public class MapGenerator3D : MonoBehaviour
     private void Start()
     {
         levelSize *= downgrading;
+        // tiling = Mathf.FloorToInt((float)tiling / (downgrading / 2));
+        // if (tiling < 1) tiling = 1;
+        mapDepth = Mathf.FloorToInt((float)mapDepth / downgrading);
+        mapWidth = Mathf.FloorToInt((float)mapWidth / downgrading);
 
         levelVertSize = (int)Mathf.Sqrt(
             levelPrefab.GetComponent<MeshFilter>().
@@ -89,7 +95,7 @@ public class MapGenerator3D : MonoBehaviour
                 SetStatus("Generating tiles...",  (float)operationsTotal / mapDepth / mapWidth );
 
                 operations++;
-                if(operations >= asyncOperations)
+                if(operations >= asyncOperationsTile)
                 {
                     operations = 0;
                     yield return null;
@@ -145,9 +151,11 @@ public class MapGenerator3D : MonoBehaviour
                     }
                 }
 
-                SetStatus("Planting trees...", (float)operationsTotal / globalVertexPositions.GetLength(0) * tiling / globalVertexPositions.GetLength(1) * tiling);
+                SetStatus("Planting trees...", 
+                    (float)operationsTotal / globalVertexPositions.GetLength(0) * tiling / globalVertexPositions.GetLength(1) * tiling);
 
-                if (operations >= asyncOperations)
+                operations++;
+                if (operations >= asyncOperationsTree)
                 {
                     operations = 0;
                     yield return null;
